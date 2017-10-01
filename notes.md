@@ -108,6 +108,7 @@ function handleError () {
 
 asyncRequestObject.onerror = handleError;
 ```
+
 ## A Full Request
 - The full code we have:
 ```
@@ -134,6 +135,7 @@ console.log( data );
 
 asyncRequestObject.onload = handleSuccess;
 ```
+
 ## Project Initial Walkthrough
 - We are going to be making a search form to generate some picture and results
 **Clone the repo**
@@ -208,13 +210,168 @@ articleRequest.send();
 
 # Lesson 2: Ajax with jQuery
 ## The jQuery Library & Ajax
+- jQuery is a pre-built system to make async requests behind the scenes
+- You can download the current version or just use the CDN in your software
+- jQuery was introduced to because browsers were not standardized on functionality yet
+- Now that they have, jQuery is not need but does offer the ajax() method which is very powerful
+
 ## jQuery's `ajax()` Method
+- This is the main method for the jQuery library to make async requests
+- You can call by 2 ways:
+  - ```$.ajax(<url-to-fetch>, <a-configuration-object>);```
+  - ```$.ajax(<just a configuration object>);```
+  
+- The most common way is to use the configuration object
+- So you can pass in the object via variable or directly into the ajax method
+- It is basically a javascript object
+```
+var settings = {
+   frosting: 'buttercream',
+   colors: ['orange', 'blue'],
+   layers: 2,
+   isRound: true
+};
+```
+  
+- So try it with jquery.com's website
+```
+$.ajax({
+    url: 'http://swapi.co/api/people/1/'
+});
+```
+
 ## Handling The Returned Data
-## Handling The returned Data
+- AJAX handles the response with the .done() function
+```
+function handleResponse(data) {
+    console.log('the ajax request has finished!');
+    console.log(data);
+}
+
+$.ajax({
+    url: 'https://swapi.co/api/people/1/'
+}).done(handleResponse);
+```
+
+**The XHR method conversion to jQuery**
+- Before we had with the XHR method:
+```
+const imgRequest = new XMLHttpRequest();
+imgRequest.onload = addImage;
+imgRequest.open('GET', `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`);
+imgRequest.setRequestHeader('Authorization', 'Client-ID <your-client-id-here>');
+imgRequest.send();
+```
+- But now the jQUery method is much quicker:
+```
+$.ajax({
+    url: `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`
+}).done(addImage);
+```
+- With the jQuery code:
+  - we do not need to create an XHR object
+  - instead of specifying that the request is a GET request, it defaults to that and we just provide the URL of the resource we're requesting
+  - instead of setting onload, we use the .done() method
+  
+**Adding authorization and API keys**
+- We can use the built-in .header() method in jQuery
+```
+$.ajax({
+  url: `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`
+  headers: {
+    Authorization: 'Client-ID 123abc456def'
+  }
+}).done(addImage);
+```
+
 ## Clean up the Success Callback
+- jQuery automatically returns JavaScript if the respone is a JSON file
+- There for we need to clean up our code to remove some things
+- Old code:
+```
+function addImage() {
+    const data = JSON.parse(this.responseText);
+    const firstImage = data.results[0];
+
+    responseContainer.insertAdjacentHTML('afterbegin', `<figure>
+            <img src="${firstImage.urls.small}" alt="${searchedForText}">
+            <figcaption>${searchedForText} by ${firstImage.user.name}</figcaption>
+        </figure>`
+    );
+}
+```
+- New code:
+```
+function addImage(images) {
+    const firstImage = images.results[0];
+
+    responseContainer.insertAdjacentHTML('afterbegin', `<figure>
+            <img src="${firstImage.urls.small}" alt="${searchedForText}">
+            <figcaption>${searchedForText} by ${firstImage.user.name}</figcaption>
+        </figure>`
+    );
+}
+```
+**The elements that have changed**
+- the function now has one parameter images
+- this parameter has already been converted from JSON to a JavaScript object, so * the line that had JSON.parse() is no longer needed.
+- the firstImage variable is set to the images.results first item
+
+**My conversion of the NY Times code to AJAX**
+- Old Code:
+```
+function addArticles () {}
+  const data = JSON.parse(this.responseText);
+  const firstArticle = data.results[0];
+
+  responseContainer.insertAdjacentHTML('afterbegin', `<figure>
+          <img src="${firstArticle.urls.small}" alt="${searchedForText}">
+          <figcaption>${searchedForText} by ${firstArticle.user.name}</figcaption>
+      </figure>`
+  );
+```
+- New Code:
+```
+function addArticles(articles) {
+  const firstArticle = articles.results[0];
+
+  responseContainer.insertAdjacentHTML('afterbegin', `<figure>
+      <img src="${firstArticle.urls.small}" alt="${searchedForText}">
+      <figcaption>${searchedForText} by ${firstArticle.user.name}</figcaption>
+  </figure>`
+  );
+}  
+```
+
 ## Code Walkthrough
+- Looking at the complete code
+
 ## Peek inside $.ajax()
+- We look into the source code of jQuery's AJAX method to see how it forms the XHR call
+- use the debugger in chrome helps also
+- See 
+  - [Pause Your Code With Breakpoints](https://developers.google.com/web/tools/chrome-devtools/javascript/breakpoints)
+  - [JavaScript Debugging Reference](https://developers.google.com/web/tools/chrome-devtools/javascript/reference)
+
 ## Review the Call Stack
+- You can use the chrome dev tools to go through the call stack
+- It checks the calls starting at he bottom of the stack first
+
 ## Walkthrough of .ajaxTransport
+- Under the hood, jQuery's ajax method does all of these things for us
+  - creates a new XHR object each time it's called
+  - sets all of the XHR properties and methods
+  - sends the XHR request
+
 ## jQuery's Other Async Methods
+- jQuery also has some convenience methods but not recommended that we use them
+- There are:
+  - .get()
+  - .getJSON()
+  - .getScript()
+  - .post()
+  - .load()
+
 ## Async with jQuery Outro
+- Now that we looked at jQuery's AJAX method, there's another one
+- There's fetch API which is even more powerful
