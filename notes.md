@@ -375,3 +375,198 @@ function addArticles(articles) {
 ## Async with jQuery Outro
 - Now that we looked at jQuery's AJAX method, there's another one
 - There's fetch API which is even more powerful
+
+# Lesson 3: Ajax With Fetch
+## Ajax call with the Fetch API
+- New technology we are looking at in this lesson
+- It's provided right in the browser
+  
+## What is Fetch
+- Fetch is promised-based and works on most browsers
+- Check [CanIUse](http://caniuse.com/#feat=fetch) to see if you're supported
+- Otherwise use this [polyfill](https://github.com/github/fetch)
+
+## Write the Fetch Request
+- A simple fetch request that returns a promise
+```
+fetch('<URL-to-the-resource-that-is-being-requested>');
+
+fetch('https://api.unsplash.com/search/photos?page=1&query=flowers');
+```
+- It still obeys Cross-Origin Rules so you need to add authorizations
+- Documents to read:
+- https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+- https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+- https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
+  
+- The two ways if you read the articles are:
+```
+fetch(https://api.unsplash.com/search/photos?page=1&query=${searchedForText}, {
+    headers: {
+        Authorization: 'Client-ID abc123'
+    }
+})
+```
+```
+const requestHeaders = new Headers();
+requestHeaders.append('Authorization', 'Client-ID abc123');
+fetch(https://api.unsplash.com/search/photos?page=1&query=${searchedForText}, {
+    headers: requestHeaders
+})
+```
+  
+**Default Method for Fetch**
+- The default method for Fetch is GET, see:
+- https://fetch.spec.whatwg.org/#methods
+- https://fetch.spec.whatwg.org/#requests
+  
+**Changing the HTTP Method**
+- You can change it easily but remember to keep it CAPITALIZED
+```
+fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
+    method: 'POST'
+});
+```
+
+## Handle the Response
+- Fetch returns a promise so then all you have to do is call .then() on that Promise
+```
+fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
+    headers: {
+        Authorization: 'Client-ID abc123'
+    }
+}).then(function(response) {
+    debugger; // work with the returned response
+})
+```
+
+## The Response Object
+- The Response object is new with Fetch API
+- However, it doesn't actually have any of the data, you need to go in teh body
+- The Unsplash API returns a JSON to us, so we call .json() on the response variable:
+```
+fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
+    headers: {
+        Authorization: 'Client-ID abc123'
+    }
+}).then(function(response) {
+    return response.json();
+});
+```
+  
+- Problem is that returns another promise so we need to chain another .then()
+- This is how to actually get and start using the returned data
+- We are calling addImage on the return data
+```
+fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
+    headers: {
+        Authorization: 'Client-ID abc123'
+    }
+}).then(function(response) {
+    return response.json();
+}).then(addImage);
+
+function addImage(data) {
+    debugger;
+}
+```
+  
+- Like how .json() method converts the response to JSON, we use .blob() to fetch an image
+
+## ES6 Arrow Function
+- We can minimiz our code further using the Arrow function
+```
+// without the arrow function
+}).then(function(response) {
+    return response.json();
+})
+
+// using the arrow function
+}).then(response => response.json())
+```
+  
+- So our complete request is:
+```
+fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
+    headers: {
+        Authorization: 'Client-ID abc123'
+    }
+}).then(response => response.json())
+.then(addImage);
+
+function addImage(data) {
+    debugger;
+}
+```
+
+## Display Content & Handling Errors
+- Now we have actual JSON data, so let's add an image and caption
+```
+function addImage(data) {
+    let htmlContent = '';
+    const firstImage = data.results[0];
+
+    if (firstImage) {
+        htmlContent = `<figure>
+            <img src="${firstImage.urls.small}" alt="${searchedForText}">
+            <figcaption>${searchedForText} by ${firstImage.user.name}</figcaption>
+        </figure>`;
+    } else {
+        htmlContent = 'Unfortunately, no image was returned for your search.'
+    }
+
+    responseContainer.insertAdjacentHTML('afterbegin', htmlContent);
+}
+```
+  
+- This code will:
+    - get the first image that's returned from Unsplash
+    - create a <figure> tag with the small image
+    - creates a <figcaption> that displays the text that was searched for along with the first name of the person that took the image
+    - if no images were returned, it displays an error message to the user
+
+**Handling Errors**
+- There might be possible errors with our request
+- The .catch() is method available from the Promise API
+1. Unsplash not having an image for the searched term
+    - We handled this in the addImage function
+2. Issues with the network
+    - Use the .catch() method
+3. Issues with teh fetch request
+    - Use the .catch() method
+  
+- So let's add a .catch() method to handle errors:
+```
+fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
+    headers: {
+        Authorization: 'Client-ID abc123'
+    }
+}).then(response => response.json())
+.then(addImage)
+.catch(e => requestError(e, 'image'));
+
+function addImage(data) {
+    debugger;
+}
+
+function requestError(e, part) {
+    console.log(e);
+    responseContainer.insertAdjacentHTML('beforeend', `<p class="network-warning">Oh no! There was an error making a request for the ${part}.</p>`);
+}
+```
+- This code adds a .catch() on the end of the promise chain
+- Adds requestError function
+- Receives error object and stores it in e variable
+- It will input e into the requestError function if something fails
+- This will log the error and display as a warning message to the user!
+
+## Project Wrap-up
+- We now finished our requests using the fetch API
+
+## Fetch Outro
+- Fetch is a great way to get asynchronous requests
+- Using custom headers and caching is possible also
+- It's promise based
+
+## Course Outro
+- Now you have XHR, jQuery, and fetch in your toolbox
