@@ -1,12 +1,13 @@
 # Asynchronous JavaScript Requests
-By Richard Kalehoff and co
-Started 9-30-2017
+By Richard Kalehoff and Co.
+Started 9-30-2017 Finished 10-02-2017
 
 # Lesson 1: Ajax with XHR ✔
 ## Course Intro
-- You make a request for data and do something else
+- With asynchronous calls, you make a request for data and then do something else
 - You deal with the data when it comes back
-- Asynchronous javascript and XML refers to many formats now, not just those 2
+- Asynchronous javascript and XML refers to many formats now, not just those 2 as in the past
+- Today, it's a misnomer but AJAX now refers to any asynchronous calls made to an API
 - We will look at XHR object, jQuery, and fetch API
 
 ## Client Server Demonstration
@@ -16,15 +17,17 @@ Started 9-30-2017
 - With async, you can "get" request data and the process will run in the background
 - When the response returns, you can use a "callback" to apply special instructions to the response
 - Async allows us to make other requests or do other things without having to wait for the response to return
-- The website renders just updates the current page as response return
+- So with the website, we just wait until the response returns and render *only* that element
+- There is no reloading of the whole page which makes the user experience much better
 
 ## Ajax Definition & Examples
 - AJAX stands for asynchronous JavaScript and XML
 - XML use to be the dominant format, now most use JSON format
 - So more correctly, AJAJ is a better name but doesn't sound as nice
 - So the AJAX response can return as XML, JSON, or HTML
+- You can see how it works by playing with it in dev tools under the network tab
 - The return formats as follows:
-1. XML
+1. XML 
 ```
 <entry></entry>
 ```
@@ -36,13 +39,24 @@ Started 9-30-2017
 ```
 <div></div>
 ```
+  
+**History**
+- AJAX was introduced in the 1990's
+- At this time, pages loaded synchronously and had to wait for all data to come in before rendering the page
+- This made it slow and clunky
+- The AJAX method was asynchronous and only renders those elements that need update
+- This method is much quickly and seemed almost instantaneous
+  
+**Problem**
+- A big problem was many browsers didn't have it implemented so complex code was required
+- That was until jQuery and YUI standardized it
 
 ## APIs
 - We use APIs (Application Programming Interface) to interact with various data sources
 - There are millions out there from Google, Youtube, etc.
-[Google APIs](https://developers.google.com/apis-explorer/)
-[Giant Database of APIs](http://www.programmableweb.com/apis/directory)
-[Udacity API](https://www.udacity.com/public-api/v1/catalog)
+    - [Google APIs](https://developers.google.com/apis-explorer/)
+    - [Giant Database of APIs](http://www.programmableweb.com/apis/directory)
+    - [Udacity API](https://www.udacity.com/public-api/v1/catalog)
 
 ## Create An Async Request with XHR
 - We have to do a lot of the initial setup of a "GET" request
@@ -59,25 +73,33 @@ const asyncRequestObject = new XMLHttpRequest()
 - XML was just the dominant format in the past
   
 **More reading**
-- MDN's docs - https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/open
+- MDN's Docs - https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/open
 - WHATWG Spec - https://xhr.spec.whatwg.org/
 - W3C Spec - https://www.w3.org/TR/XMLHttpRequest/
 
 ## XHR's.open() method
 - One popular method from setting up an XHR opject is:
+- It sets up the stage and gives the object the info it needs when the request is sent
 ```
 asyncRequestObject.open();
 // Takes (method, url, async, user, password)
 ```
 - Methods are GET (to retrieve data) and POST(to send data)
 - Remember about [same-origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy) and [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS)
+- CORS is Cross-Origin Resource Sharing which is where servers install this technology so they can share resources with developers
+- Usually with same-origin, you have to be on the same domain to access information, but with CORS, you don't
+
 - Now we try on 
 ```
+const asyncRequestObject = new XMLHttpRequest();
 asyncRequestObject.open('GET', 'https://unsplash.com');
+
+// Nothing happens? Why?
+// It's not enough just to use .open() but we also need to send out the request with .send();
 ```
 
 ## XHR's.send() method
-- It's not enough just to get a request but we also need to send it with .send();
+- Now we add a .send() method
 ```
 const asyncRequestObject = new XMLHttpRequest();
 asyncRequestObject.open('GET', 'https://unsplash.com');
@@ -85,6 +107,7 @@ asyncRequestObject.send();
 ```
   
 **Handling Success**
+- Notice that we can see that the request is sent using the network tab in dev tools
 - Even though the request was sent, we have to determine what to do with the response
 - We need to use the .onload to run the handleSuccess() function
 ```
@@ -95,6 +118,9 @@ function handleSuccess () {
     console.log( this.responseText ); // the HTML of https://unsplash.com/
 }
 
+const asyncRequestObject = new XMLHttpRequest();
+asyncRequestObject.open('GET', 'https://unsplash.com');
+asyncRequestObject.send();
 asyncRequestObject.onload = handleSuccess;
 ```
   
@@ -106,6 +132,10 @@ function handleError () {
     console.log( 'An error occurred 😞' );
 }
 
+const asyncRequestObject = new XMLHttpRequest();
+asyncRequestObject.open('GET', 'https://unsplash.com');
+asyncRequestObject.send();
+asyncRequestObject.onload = handleSuccess;
 asyncRequestObject.onerror = handleError;
 ```
 
@@ -113,27 +143,38 @@ asyncRequestObject.onerror = handleError;
 - The full code we have:
 ```
 function handleSuccess () { 
-  console.log( this.responseText ); 
-// the HTML of https://unsplash.com/}
+  console.log( this.responseText ); // the HTML of https://unsplash.com/
+}
+
 function handleError () { 
   console.log( 'An error occurred \uD83D\uDE1E' );
 }
+
 const asyncRequestObject = new XMLHttpRequest();
 asyncRequestObject.open('GET', 'https://unsplash.com');
 asyncRequestObject.onload = handleSuccess;
 asyncRequestObject.onerror = handleError;
 asyncRequestObject.send();
 ```
+  
 **APIs and JSONs**
-- What we receive in a JSON can be difficult to read?
+- What do we do with a JSON went we get back the response?
 - We can use `JSON.parse()` to output it into a javascript object
+- So now we tweak out .onload() to accomodate this
 ```
 function handleSuccess () {
-const data = JSON.parse( this.responseText ); // convert data from JSON to a JavaScript object
-console.log( data );
+    const data = JSON.parse( this.responseText ); // convert data from JSON to a JavaScript object
+    console.log( data );
 }
 
+function handleError () { 
+    console.log( 'An error occurred \uD83D\uDE1E' );
+}
+const asyncRequestObject = new XMLHttpRequest();
+asyncRequestObject.open('GET', 'https://unsplash.com');
 asyncRequestObject.onload = handleSuccess;
+asyncRequestObject.onerror = handleError;
+asyncRequestObject.send();
 ```
 
 ## Project Initial Walkthrough
@@ -150,21 +191,24 @@ asyncRequestObject.onload = handleSuccess;
 - Create a developer account here - https://developer.nytimes.com/
 - They'll email you your api-key (you'll need this to make requests)  
   
-**Unsplash Request**
-- Now we have code to send the header request:
+**Unsplash Request Needs Something Else?**
+- Note that Unsplash requires an HTTP header
+- We use XMLHttpRequest.setRequestHeader() as the method to set this
+  
+- *You must call this method after "open" but before "send"*
+- Now we have code to send the request:
 ```
 function addImage(){}
 const searchedForText = 'hippos';
 const unsplashRequest = new XMLHttpRequest();
 
 unsplashRequest.open('GET', `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`);
+unsplashRequest.setRequestHeader('Authorization', 'Client-ID <your-client-id>');
 unsplashRequest.onload = addImage;
 
 unsplashRequest.send()
 ```
-- Note that Unsplash requires an HTTP header
-- We use XMLHttpRequest.setRequestHeader() as the method to set this
-- You must call this method after "open" but before "send"
+
 
 ## Setting a Request Header
 - Now we need to set the request header before we send to unsplash
@@ -192,6 +236,65 @@ articleRequest.send();
 
 ## Project Final Walkthrough
 - Now we have all the code to send to Unsplash and NY Times
+- My working code:
+```
+<script>
+window.onload = function () {        
+    const form = document.querySelector('#search-form');
+    const searchField = document.querySelector('#search-keyword');
+    let searchedForText;
+    const responseContainer = document.querySelector('#response-container');
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        responseContainer.innerHTML = '';
+        searchedForText = searchField.value;
+
+        var unsplashRequest = new XMLHttpRequest();
+        unsplashRequest.onload = addImage;
+        unsplashRequest.onerror = function (err) { console.log(err) };
+        unsplashRequest.open('GET', `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`);
+        unsplashRequest.setRequestHeader('Authorization', 'Client-ID bf0e9ebe48cbd01b383cbbb18b6f3d49d1e44613ec1ff1db48b399144e9a4239');
+        unsplashRequest.send();
+
+        function addImage() {
+            let htmlContent = '';
+            const data = JSON.parse(this.responseText);
+            const firstImage = data.results[0];
+            
+            htmlContent = `<figure>
+                <img src="${firstImage.urls.regular}" alt= "${searchedForText}">
+                <figcaption>By <a href=${firstImage.user.links.html}>${firstImage.user.name}</a> / <a href="https://unsplash.com/">Unsplash</a></figcaption>
+            </figure>`
+            responseContainer.insertAdjacentHTML('afterbegin', htmlContent);
+        }
+
+        var nytRequest = new XMLHttpRequest();
+        nytRequest.onload = addArticles;
+        nytRequest.onerror = function (err) { console.log(err) };
+        nytRequest.open('GET', `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}&api-key=62441442c2604cc69e2a2c6f8b100ac4`)
+        nytRequest.send();
+
+        function addArticles() {
+            let htmlContent = '';
+            const data = JSON.parse(this.responseText);
+
+            if (data.response && data.response.docs && data.response.docs.length > 1) {
+                htmlContent = '<ul>' + data.response.docs.map(article => `<li class="article">
+                    <h2><a href="${article.web_url}">${article.headline.main}</a></h2>
+                    <p>${article.snippet}</p>
+                    </li>`
+                ).join('') + '</ul>';
+            } else {
+                htmlContent = '<div class="error-no-articles">No articles available</div>';
+            }
+
+            responseContainer.insertAdjacentHTML('beforeend', htmlContent);
+        }
+    })
+};
+</script>
+```
 
 ## XHR Recap
 **To Send An Async Request**
