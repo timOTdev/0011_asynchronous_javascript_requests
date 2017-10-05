@@ -27,27 +27,18 @@ Started 9-30-2017 Finished 10-02-2017
 - So the AJAX response can return as XML, JSON, or HTML
 - You can see how it works by playing with it in dev tools under the network tab
 - The return formats as follows:
-1. XML 
-```
-<entry></entry>
-```
-2. JSON
-```
-{ property: data }
-```
-3. HTML
-```
-<div></div>
-```
+1. XML `<entry></entry>`
+2. JSON `{property: data}`
+3. HTML `<div></div>`
   
-**History**
+### History
 - AJAX was introduced in the 1990's
 - At this time, pages loaded synchronously and had to wait for all data to come in before rendering the page
 - This made it slow and clunky
 - The AJAX method was asynchronous and only renders those elements that need update
 - This method is much quickly and seemed almost instantaneous
   
-**Problem**
+### Problem
 - A big problem was many browsers didn't have it implemented so complex code was required
 - That was until jQuery and YUI standardized it
 
@@ -65,14 +56,11 @@ Started 9-30-2017 Finished 10-02-2017
 ## The XHR Object
 - XHR is short for XMLHttpReqequest
 - Provided by javascript just like the document object
-- Run this command on Unsplash:
-```
-const asyncRequestObject = new XMLHttpRequest()
-```
+- Run this command on Unsplash: `const asyncRequestObject = new XMLHttpRequest()`
 - Even though it has XML in it, it is not limited to only XML documents
 - XML was just the dominant format in the past
   
-**More reading**
+### More reading
 - MDN's Docs - https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/open
 - WHATWG Spec - https://xhr.spec.whatwg.org/
 - W3C Spec - https://www.w3.org/TR/XMLHttpRequest/
@@ -80,7 +68,7 @@ const asyncRequestObject = new XMLHttpRequest()
 ## XHR's.open() method
 - One popular method from setting up an XHR opject is:
 - It sets up the stage and gives the object the info it needs when the request is sent
-```
+```js
 asyncRequestObject.open();
 // Takes (method, url, async, user, password)
 ```
@@ -90,7 +78,7 @@ asyncRequestObject.open();
 - Usually with same-origin, you have to be on the same domain to access information, but with CORS, you don't
 
 - Now we try on 
-```
+```js
 const asyncRequestObject = new XMLHttpRequest();
 asyncRequestObject.open('GET', 'https://unsplash.com');
 
@@ -100,17 +88,17 @@ asyncRequestObject.open('GET', 'https://unsplash.com');
 
 ## XHR's.send() method
 - Now we add a .send() method
-```
+```js
 const asyncRequestObject = new XMLHttpRequest();
 asyncRequestObject.open('GET', 'https://unsplash.com');
 asyncRequestObject.send();
 ```
   
-**Handling Success**
+### Handling Success
 - Notice that we can see that the request is sent using the network tab in dev tools
 - Even though the request was sent, we have to determine what to do with the response
 - We need to use the .onload to run the handleSuccess() function
-```
+```js
 function handleSuccess () {
     // in the function, the `this` value is the XHR object
     // this.responseText holds the response from the server
@@ -124,9 +112,9 @@ asyncRequestObject.send();
 asyncRequestObject.onload = handleSuccess;
 ```
   
-**Handling Errors**
+### Handling Errors
 - We need a way to handle if we get any errors also
-```
+```js
 function handleError () {
     // in the function, the `this` value is the XHR object
     console.log( 'An error occurred 😞' );
@@ -141,7 +129,7 @@ asyncRequestObject.onerror = handleError;
 
 ## A Full Request
 - The full code we have:
-```
+```js
 function handleSuccess () { 
   console.log( this.responseText ); // the HTML of https://unsplash.com/
 }
@@ -157,11 +145,11 @@ asyncRequestObject.onerror = handleError;
 asyncRequestObject.send();
 ```
   
-**APIs and JSONs**
+### APIs and JSONs
 - What do we do with a JSON went we get back the response?
 - We can use `JSON.parse()` to output it into a javascript object
 - So now we tweak out .onload() to accomodate this
-```
+```js
 function handleSuccess () {
     const data = JSON.parse( this.responseText ); // convert data from JSON to a JavaScript object
     console.log( data );
@@ -179,25 +167,25 @@ asyncRequestObject.send();
 
 ## Project Initial Walkthrough
 - We are going to be making a search form to generate some picture and results
-**Clone the repo**
+### Clone the repo
 - I've cloned the repo from the course with git clone https://github.com/udacity/course-ajax.git4  
   
-**Unsplash API**
+### Unsplash API
 - Create a developer account here - https://unsplash.com/developers
 - Next, create an application here - https://unsplash.com/oauth/applications
 - this will give you an "Application ID" that you'll need to make requests  
   
-**The New York Times API**
+### The New York Times API
 - Create a developer account here - https://developer.nytimes.com/
 - They'll email you your api-key (you'll need this to make requests)  
   
-**Unsplash Request Needs Something Else?**
+### Unsplash Request Needs Something Else?
 - Note that Unsplash requires an HTTP header
 - We use XMLHttpRequest.setRequestHeader() as the method to set this
   
 - *You must call this method after "open" but before "send"*
 - Now we have code to send the request:
-```
+```js
 function addImage(){}
 const searchedForText = 'hippos';
 const unsplashRequest = new XMLHttpRequest();
@@ -209,10 +197,9 @@ unsplashRequest.onload = addImage;
 unsplashRequest.send()
 ```
 
-
 ## Setting a Request Header
 - Now we need to set the request header before we send to unsplash
-```
+```js
 const searchedForText = 'hippos';
 const unsplashRequest = new XMLHttpRequest();
 
@@ -224,9 +211,10 @@ unsplashRequest.send();
 function addImage(){
 }
 ```  
+  
 - We also want to send to NY Times for articles 
 - It doesn't require a header so we don't have to set one
-```
+```js
 function addArticles () {}
 const articleRequest = new XMLHttpRequest();
 articleRequest.onload = addArticles;
@@ -237,7 +225,7 @@ articleRequest.send();
 ## Project Final Walkthrough
 - Now we have all the code to send to Unsplash and NY Times
 - My working code:
-```
+```js
 <script>
 window.onload = function () {        
     const form = document.querySelector('#search-form');
@@ -297,14 +285,14 @@ window.onload = function () {
 ```
 
 ## XHR Recap
-**To Send An Async Request**
+### To Send An Async Request
 - create an XHR object with the XMLHttpRequest constructor function
 - use the .open() method - set the HTTP method and the URL of the resource to be fetched
 - set the .onload property - set this to a function that will run upon a successful fetch
 - set the .onerror property - set this to a function that will run when an error occurs
 - use the .send() method - send the request
   
-**To Use The Response**
+### To Use The Response
 - use the .responseText property - holds the text of the async request's response
 
 ## XHR Outro
@@ -321,13 +309,13 @@ window.onload = function () {
 ## jQuery's `ajax()` Method
 - This is the main method for the jQuery library to make async requests
 - You can call by 2 ways:
-  - ```$.ajax(<url-to-fetch>, <a-configuration-object>);```
-  - ```$.ajax(<just a configuration object>);```
+  - `$.ajax(<url-to-fetch>, <a-configuration-object>);`
+  - `$.ajax(<just a configuration object>);`
   
 - The most common way is to use the configuration object
 - So you can pass in the object via variable or directly into the ajax method
 - It is basically a javascript object
-```
+```js
 var settings = {
    frosting: 'buttercream',
    colors: ['orange', 'blue'],
@@ -337,15 +325,15 @@ var settings = {
 ```
   
 - So try it with jquery.com's website
-```
+```js
 $.ajax({
     url: 'http://swapi.co/api/people/1/'
 });
 ```
 
-## Handling The Returned Data
+### Handling The Returned Data
 - AJAX handles the response with the .done() function
-```
+```js
 function handleResponse(data) {
     console.log('the ajax request has finished!');
     console.log(data);
@@ -356,29 +344,31 @@ $.ajax({
 }).done(handleResponse);
 ```
 
-**The XHR method conversion to jQuery**
-- Before we had with the XHR method:
-```
+### The XHR method conversion to jQuery
+- Before we had the XHR method:
+```js
 const imgRequest = new XMLHttpRequest();
 imgRequest.onload = addImage;
 imgRequest.open('GET', `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`);
 imgRequest.setRequestHeader('Authorization', 'Client-ID <your-client-id-here>');
 imgRequest.send();
 ```
+  
 - But now the jQUery method is much quicker:
-```
+```js
 $.ajax({
     url: `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`
 }).done(addImage);
 ```
+  
 - With the jQuery code:
   - we do not need to create an XHR object
   - instead of specifying that the request is a GET request, it defaults to that and we just provide the URL of the resource we're requesting
   - instead of setting onload, we use the .done() method
   
-**Adding authorization and API keys**
+### Adding authorization and API keys
 - We can use the built-in .header() method in jQuery
-```
+```js
 $.ajax({
   url: `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`
   headers: {
@@ -391,7 +381,7 @@ $.ajax({
 - jQuery automatically returns JavaScript if the respone is a JSON file
 - There for we need to clean up our code to remove some things
 - Old code:
-```
+```js
 function addImage() {
     const data = JSON.parse(this.responseText);
     const firstImage = data.results[0];
@@ -403,8 +393,9 @@ function addImage() {
     );
 }
 ```
+  
 - New code:
-```
+```js
 function addImage(images) {
     const firstImage = images.results[0];
 
@@ -415,14 +406,15 @@ function addImage(images) {
     );
 }
 ```
-**The elements that have changed**
-- the function now has one parameter images
+
+### The elements that have changed
+- the function now has one parameter: images
 - this parameter has already been converted from JSON to a JavaScript object, so * the line that had JSON.parse() is no longer needed.
 - the firstImage variable is set to the images.results first item
 
-**My conversion of the NY Times code to AJAX**
+### My conversion of the NY Times code to AJAX
 - Old Code:
-```
+```js
 function addArticles () {}
   const data = JSON.parse(this.responseText);
   const firstArticle = data.results[0];
@@ -433,8 +425,9 @@ function addArticles () {}
       </figure>`
   );
 ```
+  
 - New Code:
-```
+```js
 function addArticles(articles) {
   const firstArticle = articles.results[0];
 
@@ -469,11 +462,11 @@ function addArticles(articles) {
 ## jQuery's Other Async Methods
 - jQuery also has some convenience methods but not recommended that we use them
 - There are:
-  - .get()
-  - .getJSON()
-  - .getScript()
-  - .post()
-  - .load()
+  - `.get()`
+  - `.getJSON()`
+  - `.getScript()`
+  - `.post()`
+  - `.load()`
 
 ## Async with jQuery Outro
 - Now that we looked at jQuery's AJAX method, there's another one

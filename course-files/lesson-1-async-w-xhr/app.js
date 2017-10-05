@@ -1,4 +1,4 @@
-window.onload = function () {        
+(function () {        
     const form = document.querySelector('#search-form');
     const searchField = document.querySelector('#search-keyword');
     let searchedForText;
@@ -8,14 +8,8 @@ window.onload = function () {
         e.preventDefault();
         responseContainer.innerHTML = '';
         searchedForText = searchField.value;
-
-        var unsplashRequest = new XMLHttpRequest();
-        unsplashRequest.onload = addImage;
-        unsplashRequest.onerror = function (err) { console.log(err) };
-        unsplashRequest.open('GET', `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`);
-        unsplashRequest.setRequestHeader('Authorization', 'Client-ID bf0e9ebe48cbd01b383cbbb18b6f3d49d1e44613ec1ff1db48b399144e9a4239');
-        unsplashRequest.send();
-
+        
+        // Add image function and xhr request
         function addImage() {
             let htmlContent = '';
             const data = JSON.parse(this.responseText);
@@ -25,15 +19,18 @@ window.onload = function () {
                 <img src="${firstImage.urls.regular}" alt= "${searchedForText}">
                 <figcaption>By <a href=${firstImage.user.links.html}>${firstImage.user.name}</a> / <a href="https://unsplash.com/">Unsplash</a></figcaption>
             </figure>`
+
             responseContainer.insertAdjacentHTML('afterbegin', htmlContent);
-        }
+        } // end of addImage()
 
-        var nytRequest = new XMLHttpRequest();
-        nytRequest.onload = addArticles;
-        nytRequest.onerror = function (err) { console.log(err) };
-        nytRequest.open('GET', `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}&api-key=62441442c2604cc69e2a2c6f8b100ac4`)
-        nytRequest.send();
+        var unsplashRequest = new XMLHttpRequest();
+        unsplashRequest.onload = addImage;
+        unsplashRequest.onerror = function (err) { console.log(err) };
+        unsplashRequest.open('GET', `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`);
+        unsplashRequest.setRequestHeader('Authorization', 'Client-ID bf0e9ebe48cbd01b383cbbb18b6f3d49d1e44613ec1ff1db48b399144e9a4239');
+        unsplashRequest.send();
 
+        // Add articles function and xhr request
         function addArticles() {
             let htmlContent = '';
             const data = JSON.parse(this.responseText);
@@ -49,6 +46,12 @@ window.onload = function () {
             }
 
             responseContainer.insertAdjacentHTML('beforeend', htmlContent);
-        }
-    })
-};
+        } // end of addArticles()
+
+        var nytRequest = new XMLHttpRequest();
+        nytRequest.onload = addArticles;
+        nytRequest.onerror = function (err) { console.log(err) };
+        nytRequest.open('GET', `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}&api-key=62441442c2604cc69e2a2c6f8b100ac4`)
+        nytRequest.send();
+    }) // end of form.addEventListener
+})(); // end of function
