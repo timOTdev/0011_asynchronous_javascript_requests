@@ -1,5 +1,3 @@
-/* eslint-env jquery */
-
 (function () {
     const form = document.querySelector('#search-form');
     const searchField = document.querySelector('#search-keyword');

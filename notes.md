@@ -298,8 +298,69 @@ window.onload = function () {
 ## XHR Outro
 - You do have to write all that code if you want to do an XHR request
 - But let's check out jQuery to see how they do it
+  
+- My personal code for XHR request:
+```js
+(function () {        
+    const form = document.querySelector('#search-form');
+    const searchField = document.querySelector('#search-keyword');
+    let searchedForText;
+    const responseContainer = document.querySelector('#response-container');
 
-# Lesson 2: Ajax with jQuery
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        responseContainer.innerHTML = '';
+        searchedForText = searchField.value;
+        
+        // Add image function and xhr request
+        function addImage() {
+            let htmlContent = '';
+            const data = JSON.parse(this.responseText);
+            const firstImage = data.results[0];
+            
+            htmlContent = `<figure>
+                <img src="${firstImage.urls.regular}" alt= "${searchedForText}">
+                <figcaption>By <a href=${firstImage.user.links.html}>${firstImage.user.name}</a> / <a href="https://unsplash.com/">Unsplash</a></figcaption>
+            </figure>`
+
+            responseContainer.insertAdjacentHTML('afterbegin', htmlContent);
+        } // end of addImage()
+
+        var unsplashRequest = new XMLHttpRequest();
+        unsplashRequest.onload = addImage;
+        unsplashRequest.onerror = function (err) { console.log(err) };
+        unsplashRequest.open('GET', `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`);
+        unsplashRequest.setRequestHeader('Authorization', 'Client-ID bf0e9ebe48cbd01b383cbbb18b6f3d49d1e44613ec1ff1db48b399144e9a4239');
+        unsplashRequest.send();
+
+        // Add articles function and xhr request
+        function addArticles() {
+            let htmlContent = '';
+            const data = JSON.parse(this.responseText);
+
+            if (data.response && data.response.docs && data.response.docs.length > 1) {
+                htmlContent = '<ul>' + data.response.docs.map(article => `<li class="article">
+                    <h2><a href="${article.web_url}">${article.headline.main}</a></h2>
+                    <p>${article.snippet}</p>
+                    </li>`
+                ).join('') + '</ul>';
+            } else {
+                htmlContent = '<div class="error-no-articles">No articles available</div>';
+            }
+
+            responseContainer.insertAdjacentHTML('beforeend', htmlContent);
+        } // end of addArticles()
+
+        var nytRequest = new XMLHttpRequest();
+        nytRequest.onload = addArticles;
+        nytRequest.onerror = function (err) { console.log(err) };
+        nytRequest.open('GET', `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}&api-key=62441442c2604cc69e2a2c6f8b100ac4`)
+        nytRequest.send();
+    }) // end of form.addEventListener
+})(); // end of function
+```
+
+# Lesson 2: Ajax with jQuery ✔
 ## The jQuery Library & Ajax
 - jQuery is a pre-built system to make async requests behind the scenes
 - You can download the current version or just use the CDN in your software
@@ -471,8 +532,70 @@ function addArticles(articles) {
 ## Async with jQuery Outro
 - Now that we looked at jQuery's AJAX method, there's another one
 - There's fetch API which is even more powerful
+  
+- My personal code for ajax request:
+```js
+(function () {
+    const form = document.querySelector('#search-form');
+    const searchField = document.querySelector('#search-keyword');
+    let searchedForText;
+    const responseContainer = document.querySelector('#response-container');
 
-# Lesson 3: Ajax With Fetch
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        responseContainer.innerHTML = '';
+        searchedForText = searchField.value;
+
+        // Add image function and ajax request
+        function addImage(data) {
+            let htmlContent = '';
+            const firstImage = data.results[0];
+
+            responseContainer.insertAdjacentHTML('afterbegin', `<figure>
+                <img src="${firstImage.urls.small}" alt= "${searchedForText}">
+                <figcaption>By <a href=${firstImage.user.links.html}>${firstImage.user.name}</a> / <a href="https://unsplash.com/">Unsplash</a></figcaption>
+            </figure>`
+            );
+        } // end of addImage()
+
+        $.ajax({
+            url: `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`,
+            headers: {
+                Authorization: 'Client-ID bf0e9ebe48cbd01b383cbbb18b6f3d49d1e44613ec1ff1db48b399144e9a4239'
+            }
+        }).done(addImage)
+        .fail(function (err) {
+            requestError(err, 'image');
+        }); // end of add image ajax request
+
+        // Add articles function and ajax request
+        function addArticles(data) {
+            let htmlContent = '';
+
+            if (data.response && data.response.docs && data.response.docs.length > 1) {
+                htmlContent = '<ul>' + data.response.docs.map(article => `<li class="article">
+                    <h2><a href="${article.web_url}">${article.headline.main}</a></h2>
+                    <p>${article.snippet}</p>
+                    </li>`
+                ).join('') + '</ul>';
+            } else {
+                htmlContent = '<div class="error-no-articles">No articles available</div>';
+            }
+
+            responseContainer.insertAdjacentHTML('beforeend', htmlContent);
+        } // end of addArticles()
+
+        $.ajax({
+            url: `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}&api-key=62441442c2604cc69e2a2c6f8b100ac4`
+        }).done(addArticles)
+        .fail(function (err) {
+            requestError(err, 'image');
+        }); // end of add articles ajax request
+    }); // end of form.addEventListener
+})(); // end of function()
+```
+
+# Lesson 3: Ajax With Fetch ✔
 ## Ajax call with the Fetch API
 - New technology we are looking at in this lesson
 - It's provided right in the browser
@@ -484,7 +607,7 @@ function addArticles(articles) {
 
 ## Write the Fetch Request
 - A simple fetch request that returns a promise
-```
+```js
 fetch('<URL-to-the-resource-that-is-being-requested>');
 
 fetch('https://api.unsplash.com/search/photos?page=1&query=flowers');
@@ -495,15 +618,15 @@ fetch('https://api.unsplash.com/search/photos?page=1&query=flowers');
 - https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
 - https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
   
-- The two ways if you read the articles are:
-```
+- The two ways to add authorization if you read the articles are:
+```js
 fetch(https://api.unsplash.com/search/photos?page=1&query=${searchedForText}, {
     headers: {
         Authorization: 'Client-ID abc123'
     }
 })
 ```
-```
+```js
 const requestHeaders = new Headers();
 requestHeaders.append('Authorization', 'Client-ID abc123');
 fetch(https://api.unsplash.com/search/photos?page=1&query=${searchedForText}, {
@@ -511,14 +634,14 @@ fetch(https://api.unsplash.com/search/photos?page=1&query=${searchedForText}, {
 })
 ```
   
-**Default Method for Fetch**
+### Default Method for Fetch
 - The default method for Fetch is GET, see:
 - https://fetch.spec.whatwg.org/#methods
 - https://fetch.spec.whatwg.org/#requests
   
-**Changing the HTTP Method**
+### Changing the HTTP Method
 - You can change it easily but remember to keep it CAPITALIZED
-```
+```js
 fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
     method: 'POST'
 });
@@ -526,7 +649,7 @@ fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, 
 
 ## Handle the Response
 - Fetch returns a promise so then all you have to do is call .then() on that Promise
-```
+```js
 fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
     headers: {
         Authorization: 'Client-ID abc123'
@@ -540,7 +663,7 @@ fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, 
 - The Response object is new with Fetch API
 - However, it doesn't actually have any of the data, you need to go in teh body
 - The Unsplash API returns a JSON to us, so we call .json() on the response variable:
-```
+```js
 fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
     headers: {
         Authorization: 'Client-ID abc123'
@@ -553,7 +676,7 @@ fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, 
 - Problem is that returns another promise so we need to chain another .then()
 - This is how to actually get and start using the returned data
 - We are calling addImage on the return data
-```
+```js
 fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
     headers: {
         Authorization: 'Client-ID abc123'
@@ -570,8 +693,8 @@ function addImage(data) {
 - Like how .json() method converts the response to JSON, we use .blob() to fetch an image
 
 ## ES6 Arrow Function
-- We can minimiz our code further using the Arrow function
-```
+- We can minimize our code further using the Arrow function
+```js
 // without the arrow function
 }).then(function(response) {
     return response.json();
@@ -582,7 +705,7 @@ function addImage(data) {
 ```
   
 - So our complete request is:
-```
+```js
 fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
     headers: {
         Authorization: 'Client-ID abc123'
@@ -597,7 +720,7 @@ function addImage(data) {
 
 ## Display Content & Handling Errors
 - Now we have actual JSON data, so let's add an image and caption
-```
+```js
 function addImage(data) {
     let htmlContent = '';
     const firstImage = data.results[0];
@@ -621,7 +744,7 @@ function addImage(data) {
     - creates a <figcaption> that displays the text that was searched for along with the first name of the person that took the image
     - if no images were returned, it displays an error message to the user
 
-**Handling Errors**
+### Handling Errors
 - There might be possible errors with our request
 - The .catch() is method available from the Promise API
 1. Unsplash not having an image for the searched term
@@ -632,7 +755,7 @@ function addImage(data) {
     - Use the .catch() method
   
 - So let's add a .catch() method to handle errors:
-```
+```js
 fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
     headers: {
         Authorization: 'Client-ID abc123'
@@ -663,6 +786,75 @@ function requestError(e, part) {
 - Fetch is a great way to get asynchronous requests
 - Using custom headers and caching is possible also
 - It's promise based
+  
+- My personal code for the fetch request:
+```js
+(function () {
+    const form = document.querySelector('#search-form');
+    const searchField = document.querySelector('#search-keyword');
+    let searchedForText;
+    const responseContainer = document.querySelector('#response-container');
 
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        responseContainer.innerHTML = '';
+        searchedForText = searchField.value;
+
+        // Error handling
+        function requestError(e, part) {
+            console.log(e);
+            responseContainer.insertAdjacentHTML('beforeend', `<p class="network-warning">Oh no! There was an error making a request for the ${part}.</p>`);
+        }
+
+        // Add image function and fetch request
+        function addImage(data) {
+            let htmlContent = '';
+            const firstImage = data.results[0];
+            
+            if (firstImage) {
+                htmlContent = `<figure>
+                    <img src="${firstImage.urls.small}" alt= "${searchedForText}">
+                    <figcaption>By <a href=${firstImage.user.links.html}>${firstImage.user.name}</a> / <a href="https://unsplash.com/">Unsplash</a></figcaption>
+                </figure>`;
+            } else {
+                htmlContent = 'Unfortunately, no image was returned for your search.'
+            }
+            
+            responseContainer.insertAdjacentHTML('afterbegin', htmlContent);
+        } // end of addImage()
+
+        fetch(`https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`, {
+            headers: {
+                Authorization: 'Client-ID bf0e9ebe48cbd01b383cbbb18b6f3d49d1e44613ec1ff1db48b399144e9a4239'
+            }
+        })
+        .then(response => response.json())
+        .then(addImage)
+        .catch(err => requestError(err, 'image')); // end of add image fetch 
+
+        // Add articles function and fetch request
+        function addArticles(data) {
+            let htmlContent = '';
+
+            if (data.response && data.response.docs && data.response.docs.length > 1) {
+                htmlContent = '<ul>' + data.response.docs.map(article => `<li class="article">
+                    <h2><a href="${article.web_url}">${article.headline.main}</a></h2>
+                    <p>${article.snippet}</p>
+                    </li>`
+                ).join('') + '</ul>';
+            } else {
+                htmlContent = '<div class="error-no-articles">No articles available</div>';
+            }
+
+            responseContainer.insertAdjacentHTML('beforeend', htmlContent);
+        } // end of addArticles()
+
+        fetch(`http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}&api-key=62441442c2604cc69e2a2c6f8b100ac4`)
+        .then(response => response.json())
+        .then(addArticles)
+        .catch(err => requestError(err, 'image')); // end of add articles fetch
+    });
+})();
+```
 ## Course Outro
 - Now you have XHR, jQuery, and fetch in your toolbox
